@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ZXing;
 
 namespace FinalIS
 {
@@ -22,27 +23,65 @@ namespace FinalIS
 
         private void scanbtt1_Click(object sender, EventArgs e)
         {
-            SqlConnection con = new SqlConnection(cnn);
-            con.Open();
-            if (con.State == ConnectionState.Open)
+            if (string.IsNullOrWhiteSpace(scantb1.Text))
             {
-                string q = "SELECT * FROM QR WHERE Hashid='" + scantb1.Text + "'";
-                SqlCommand cmd = new SqlCommand(q, con);
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                MessageBox.Show("Vui Lòng Quét Lại QR", "ERROR!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                SqlConnection con = new SqlConnection(cnn);
+                con.Open();
+                if (con.State == ConnectionState.Open)
                 {
-                    if (reader.HasRows)
+                    string q = "SELECT * FROM QR WHERE Hashid='" + scantb1.Text + "'";
+                    SqlCommand cmd = new SqlCommand(q, con);
+                    using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        while (reader.Read())
+                        if (reader.HasRows)
                         {
-                            scantext1.Text = reader[1].ToString();
-                            scantext2.Text = reader[2].ToString();
-                            scantext3.Text = reader[3].ToString();
-                            scantext4.Text = reader[4].ToString();
+                            while (reader.Read())
+                            {
+                                scantext1.Text = reader[1].ToString();
+                                scantext2.Text = reader[2].ToString();
+                                scantext3.Text = reader[3].ToString();
+                                scantext4.Text = reader[4].ToString();
+                            }
                         }
                     }
+                    con.Close();
+                    scantb1.Clear();
                 }
-                con.Close();
+                pictureBox1.Image = Image.FromFile(@"..\..\res\logo.png");
             }
+        }
+
+        private void decodeQR()
+        {
+            try
+            {
+                Bitmap bitmap = new Bitmap(pictureBox1.Image);
+                BarcodeReader reader = new BarcodeReader { AutoRotate = true, TryInverted = true };
+                Result result = reader.Decode(bitmap);
+                string decoded = result.ToString().Trim();
+                scantb1.Text = decoded;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Image not found", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void buttonLoad_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog open = new OpenFileDialog();
+            // image filters
+            open.Filter = "Image Files(*.jpg; *.jpeg; *.gif; *.bmp; *.png)|*.jpg; *.jpeg; *.gif; *.bmp ;*.png";
+            if (open.ShowDialog() == DialogResult.OK)
+            {
+                // display image in picture box
+                pictureBox1.Image = new Bitmap(open.FileName);
+            }
+            decodeQR();
         }
     }
 }

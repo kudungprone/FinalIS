@@ -27,32 +27,39 @@ namespace FinalIS
 
         private void Createbtt_Click(object sender, EventArgs e)
         {
-            var hashid1 = createhash();
-            SqlConnection con = new SqlConnection(cnn);
-            con.Open();
-            if (con.State == ConnectionState.Open)
+            if (string.IsNullOrWhiteSpace(textBox1.Text) || string.IsNullOrWhiteSpace(textBox2.Text) || string.IsNullOrWhiteSpace(textBox3.Text) || string.IsNullOrWhiteSpace(textBox4.Text))
             {
-                string q = "insert into QR(LastName,FirstName,Age,Department,HashID)values('" + textBox2.Text.ToString() + "','" + textBox1.Text.ToString() + "','" + textBox3.Text.ToString() + "','" + textBox4.Text.ToString() + "','" + hashid1 + "')";
-                SqlCommand cmd = new SqlCommand(q, con);
-                cmd.ExecuteNonQuery();
+                MessageBox.Show("Thiếu Data rồi", "Điền Lại đi!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            con.Close();
-            var qr = new ZXing.BarcodeWriter();
-            QrCodeEncodingOptions options = new QrCodeEncodingOptions();
-            options = new QrCodeEncodingOptions
+            else
             {
-                DisableECI = true,
-                CharacterSet = "UTF-8",
-                Width = 250,
-                Height = 250,
-            };
-            var writer = new BarcodeWriter();
-            writer.Format = BarcodeFormat.QR_CODE;
-            writer.Options = options;
-            qr.Options = options;
-            qr.Format = ZXing.BarcodeFormat.QR_CODE;
-            var result = new Bitmap(qr.Write(hashid1));
-            pictureBox1.Image = result;
+                var hashid1 = createhash();
+                SqlConnection con = new SqlConnection(cnn);
+                con.Open();
+                if (con.State == ConnectionState.Open)
+                {
+                    string q = "insert into QR(LastName,FirstName,Age,Department,HashID)values('" + textBox2.Text.ToString() + "','" + textBox1.Text.ToString() + "','" + textBox3.Text.ToString() + "','" + textBox4.Text.ToString() + "','" + hashid1 + "')";
+                    SqlCommand cmd = new SqlCommand(q, con);
+                    cmd.ExecuteNonQuery();
+                }
+                con.Close();
+                var qr = new ZXing.BarcodeWriter();
+                QrCodeEncodingOptions options = new QrCodeEncodingOptions();
+                options = new QrCodeEncodingOptions
+                {
+                    DisableECI = true,
+                    CharacterSet = "UTF-8",
+                    Width = 250,
+                    Height = 250,
+                };
+                var writer = new BarcodeWriter();
+                writer.Format = BarcodeFormat.QR_CODE;
+                writer.Options = options;
+                qr.Options = options;
+                qr.Format = ZXing.BarcodeFormat.QR_CODE;
+                var result = new Bitmap(qr.Write(hashid1));
+                pictureBox1.Image = result;
+            }
         }
 
         private void savebtt_Click(object sender, EventArgs e)
